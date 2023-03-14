@@ -1,0 +1,120 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div id="blockform">
+       <form method="POST" action="saveuser.php" id="form">
+           <div class="row error center" id="blockerror"></div>
+           <div class="row">
+               <div class="firstcolumn">Name</div>
+               <div class="secondcolumn"><input type="text" name="name" id="name" class="inputfield" /></div>
+           </div>
+           <div class="row">
+               <div class="firstcolumn">CoName</div>
+               <div class="secondcolumn"><input type="text" name="coname" id="coname" class="inputfield" /></div>
+           </div>
+           <div class="row">
+               <div class="firstcolumn">Email</div>
+               <div class="secondcolumn"><input type="email" name="mail" id="mail" class="inputfield" /></div>
+           </div>
+           <div class="row">
+               <div class="firstcolumn">Password</div>
+               <div class="secondcolumn"><input type="password" name="pass" id="pass" class="inputfield" /></div>
+           </div>
+           <div class="row">
+               <div class="firstcolumn">Repeat password</div>
+               <div class="secondcolumn"><input type="password" name="pass2" id="pass2" class="inputfield" /></div>
+           </div>
+           <div class="row center">
+               <input type="button" value="Register" id="savebutton" />
+           </div>
+       </form>
+    </div>
+    <script>
+        let error=[];
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('savebutton').onclick = function() {
+                let error=[];
+                let post = [];
+                let pass='';
+                Array.from(document.getElementsByClassName('inputfield')).forEach((elem) => {
+                    let value = document.getElementById(elem.getAttribute('id')).value;
+                    post.push(elem.getAttribute('name')+'='+value);
+                    switch(elem.getAttribute('type')) {
+                        case 'text':
+                            if (!validLen(value)) {
+                                error.push('field ' + elem.getAttribute('name') + ' must have from 3 to 30 symbols');
+                            }
+                            break;
+                        case 'email':
+                            if (!validLen(value)) {
+                                error.push('field ' + elem.getAttribute('name') + ' must have from 3 to 30 symbols');
+                            }
+                            if (!validEmail(value)) {
+                                error.push('field' + elem.getAttribute('name') + ' must have @ symbol');
+                            }
+                            break;
+                        case 'password':
+                            if (!validPass(value)) {
+                                error.push('field' + elem.getAttribute('name') + ' must have from 8 symbols');
+                            }
+                            if (pass == '') {
+                                pass = value;
+                            } else if (!validRepeat(pass, value)) {
+                                error.push('pass and pass2 is not identical');
+                            }
+                            break;
+                    }
+                });
+                if (error.length > 0) {
+                    error.forEach((elem) => {
+                        document.getElementById('blockerror').innerHTML = document.getElementById('blockerror').innerHTML + '<div>' + elem + '</div>';
+                    });
+                } else {
+                    document.getElementById('blockerror').innerHTML = '';
+                    register(post);
+                }
+            };
+        });
+
+        function validLen(val) {
+            return val.trim().length >= 3 && val.trim().length <= 30;
+        }
+
+        function validEmail(val) {
+            return val.indexOf('@') >= 0;
+        }
+
+        function validPass(val) {
+            return val.length >= 8 && val.length <= 30;
+        }
+
+        function validRepeat(val1, val2) {
+            return val1 == val2;
+        }
+
+        function register(post) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', document.getElementById('form').getAttribute('action'));
+            xhr.responseType = 'json';
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = () => {
+                console.log(xhr.response);
+                if (xhr.status !== 201) {
+                    document.getElementById('blockerror').innerHTML = '<div>' + xhr.response.error + '</div>';
+                    return;
+                } else {
+                    document.getElementById('blockform').innerHTML='<div>'+xhr.response.data+'</div>';
+                }
+            }
+            xhr.send(post.join('&'));
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
